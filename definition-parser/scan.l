@@ -1,0 +1,176 @@
+%{
+#include <iostream>
+#include "y.tab.h"
+using namespace std;
+int yyparse();
+%}
+
+%option yylineno
+
+LOWERCASE [a-z]
+UPPERCASE [A-Z]
+LETTER  [a-zA-Z]
+DIGIT   [0-9]
+LPARAN  \(
+RPARAN  \)
+LBRACK  \[
+RBRACK  \]
+LCURLY	\{
+RCURLY	\}
+COMMA   \,
+COL \:
+PERCENT \%
+
+CARET \^
+DCARET \^^
+
+PP \P
+SP \S
+
+NEWLINE (\n)+
+
+SETINDICATOR "s["
+ID	{LOWERCASE}({LETTER}|{DIGIT})*
+
+FLOAT    {DIGIT}*("."{DIGIT}|{DIGIT}"."){DIGIT}*
+INTEGER {DIGIT}+
+STRING 	((\")([^"]|(\\\"))*(\"))|((\')([^']|(\\\'))*(\'))
+
+BOOLEANTRUE "True"
+BOOLEANFALSE "False"
+
+ASSIGNMENT "<-"
+INSERT "<+"
+REMOVE "<x"
+
+LESS "<"
+GREATER ">"
+LESSEQUAL "<="
+GREATEREQUAL ">="
+EQUAL "=="
+NOTEQUAL "!="
+
+CONCAT "+"
+ALTER "|"
+REP "*"
+
+INTDECLARATION "Integer "
+FLOATDECLARATION "Float "
+STRINGDECLARATION "String "
+BOOLEANDECLARATION "Boolean "
+
+PAIRDECLARATION  "() "
+LISTDECLARATION "{} "
+MAPDECLARATION "[] "
+SETDECLARATION  "s[] "
+
+POINTDECLARATION "P* "
+ONEWAYSTREETDECLARATION "S| "
+TWOWAYSTREETDECLARATION "S|| "
+
+ONEWAYSTREETNETWORKDECLARATION  "SN| "
+TWOWAYSTREETNETWORKDECLARATION  "SN|| "
+
+FINDROUTE ".findRoute"
+SORT ".sort"
+LIMIT ".limit"
+
+LIMITORS "Simple"|"Distance"|"Time"
+
+%%
+
+[ \t] { /* skip whitespace */
+  ;
+}
+
+"#".*|"#-"(.|\n)*"-#" { /* skip comment */
+  ;
+}
+
+{ONEWAYSTREETNETWORKDECLARATION} return ONEWAYSTREETNETWORKDECLARATION;
+{TWOWAYSTREETNETWORKDECLARATION} return TWOWAYSTREETNETWORKDECLARATION;
+
+{ID} {
+	yylval.string = strdup(yytext);
+	return ID;
+};
+
+{LESS} return LESS;
+{GREATER} return GREATER;
+{LESSEQUAL} return LESSEQUAL;
+{GREATEREQUAL} return GREATEREQUAL;
+{EQUAL} return EQUAL;
+{NOTEQUAL} return NOTEQUAL;
+
+{ASSIGNMENT} return ASSIGNMENT;
+{INSERT} return INSERT;
+{REMOVE} return REMOVE;
+
+{CONCAT} return CONCAT;
+{ALTER} return ALTER;
+{REP} return REP;
+
+{STRING} {
+	yylval.string = strdup(yytext);
+	return STRING_TOKEN;
+};
+{INTEGER} {
+	yylval.integer = atoi(yytext);
+	return INTEGER_TOKEN;
+};
+{FLOAT} {
+	yylval.fp = atof(yytext);
+	return FLOAT_TOKEN;
+};
+
+{INTDECLARATION} return INTDECLARATION;
+{FLOATDECLARATION} return FLOATDECLARATION;
+{STRINGDECLARATION} return STRINGDECLARATION;
+{BOOLEANDECLARATION} return BOOLEANDECLARATION;
+
+{PAIRDECLARATION}    return PAIRDECLARATION;
+{LISTDECLARATION} return LISTDECLARATION;
+{MAPDECLARATION} return MAPDECLARATION;
+{SETDECLARATION} return SETDECLARATION;
+{SETINDICATOR} return SETINDICATOR;
+{POINTDECLARATION} return POINTDECLARATION;
+
+{ONEWAYSTREETDECLARATION} return ONEWAYSTREETDECLARATION;
+{TWOWAYSTREETDECLARATION} return TWOWAYSTREETDECLARATION;
+
+{FINDROUTE} return FINDROUTE;
+{SORT} return SORT;
+{LIMIT} return LIMIT;
+{LIMITORS} return LIMITORS;
+
+{LPARAN} return LPARAN;
+{RPARAN} return RPARAN;
+{LBRACK} return LBRACK;
+{RBRACK} return RBRACK;
+{LCURLY} return LCURLY;
+{RCURLY} return RCURLY;
+{COMMA} return COMMA;
+{COL} return COL;
+
+{PERCENT} return PERCENT;
+
+{PP} return PP;
+{SP} return SP;
+
+{CARET} return CARET;
+{DCARET} return DCARET;
+
+{NEWLINE} return NEWLINE;
+
+{BOOLEANTRUE} return BOOLEANTRUE;
+{BOOLEANFALSE} return BOOLEANFALSE;
+
+. { /* anything else is error */
+  return ERROR_CHAR;
+}
+
+%%
+int yywrap()
+{
+	return 1;
+}
